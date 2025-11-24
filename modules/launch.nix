@@ -72,7 +72,7 @@ let
     (optionals config.bubblewrap.apivfs.proc ["--proc" "/proc"])
 
     bindDevPaths
-    
+
     (optionals config.dbus.enable [
       (bind [ dbusOutsidePath "$XDG_RUNTIME_DIR/nixpak-bus" ])
       "--setenv" "DBUS_SESSION_BUS_ADDRESS"
