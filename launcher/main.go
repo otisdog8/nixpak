@@ -186,6 +186,25 @@ func instanceId() string {
 	return enc.EncodeToString(sum[:])
 }
 
+func findBindablePath(startPath string) string {
+	path, err := filepath.Abs(startPath)
+	if err != nil {
+		return ""
+	}
+
+	for {
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+
+		parent := filepath.Dir(path)
+		if parent == path || parent == "" {
+			return ""
+		}
+		path = parent
+	}
+}
+
 func waitUntilFileAppears(filename string) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -230,6 +249,8 @@ type Config struct {
 	WaylandProxyExe         string
 	WaylandProxyArgs        []string
 	WaylandProxySocketPath  string
+	BindFirstArg            bool
+	BindLastArg             bool
 }
 
 func readConfig() (conf Config) {
@@ -278,6 +299,9 @@ func readConfig() (conf Config) {
 			panic("Wayland proxy socket already exists")
 		}
 	}
+
+	_, conf.BindFirstArg = os.LookupEnv("NIXPAK_BIND_FIRST_ARG")
+	_, conf.BindLastArg = os.LookupEnv("NIXPAK_BIND_LAST_ARG")
 
 	return
 }
@@ -399,6 +423,19 @@ func StartBwrap(conf Config, flatpakMetadata FlatpakMetadata) (bwrap Bwrap) {
 	bwrapArgs := append([]string{"--info-fd", "3", "--block-fd", "4"}, conf.BwrapArgs...)
 	if conf.UseFlatpakMetadata {
 		bwrapArgs = append(bwrapArgs, []string{"--ro-bind", flatpakMetadata.MetadataDirectory + "/info", "/.flatpak-info"}...)
+	}
+	if conf.BindFirstArg && len(conf.AppArgs) > 0 {
+		if path := findBindablePath(conf.AppArgs[0]); path != "" {
+			bwrapArgs = append(bwrapArgs, "--bind", path, path)
+		}
+	}
+	if conf.BindLastArg && len(conf.AppArgs) > 0 {
+		lastIdx := len(conf.AppArgs) - 1
+		if !conf.BindFirstArg || lastIdx > 0 {
+			if path := findBindablePath(conf.AppArgs[lastIdx]); path != "" {
+				bwrapArgs = append(bwrapArgs, "--bind", path, path)
+			}
+		}
 	}
 	if conf.UseWaylandProxy {
 		waylandProxySocketPathInner := filepath.Join(requiredEnv("XDG_RUNTIME_DIR"), "nixpak-wayland")

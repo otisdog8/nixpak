@@ -41,6 +41,9 @@ in {
       default = [];
     };
 
+    bind.firstArg = mkMountToggle "the first argument passed to the application" // { default = false; };
+    bind.lastArg = mkMountToggle "the last argument passed to the application" // { default = false; };
+
     tmpfs = mkOption {
       description = "Tmpfs locations.";
       type = types.listOf sloth.type;

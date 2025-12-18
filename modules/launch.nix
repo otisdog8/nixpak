@@ -115,6 +115,8 @@ let
         "--set NIXPAK_APP_EXE ${app}${executablePath}"
         "--set BUBBLEWRAP_ARGS ${bwrapArgsJson}"
         "--set FLATPAK_METADATA_TEMPLATE ${config.flatpak.infoFile}"
+        (optionals config.bubblewrap.bind.firstArg "--set NIXPAK_BIND_FIRST_ARG 1")
+        (optionals config.bubblewrap.bind.lastArg "--set NIXPAK_BIND_LAST_ARG 1")
         (optionals config.dbus.enable "--set XDG_DBUS_PROXY_EXE ${dbusProxyWrapper}")
         (optionals config.dbus.enable "--set XDG_DBUS_PROXY_ARGS ${dbusProxyArgsJson}")
         (optionals pastaEnable "--set PASTA_EXE ${config.pasta.package}/bin/pasta")
