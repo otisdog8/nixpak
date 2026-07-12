@@ -35,12 +35,16 @@ let
   bind = bind' "--bind-try";
   bindRo = bind' "--ro-bind-try";
   bindDev = bind' "--dev-bind-try";
+  bindHard = bind' "--bind";
+  bindRoHard = bind' "--ro-bind";
   setEnv = key: val: [ "--setenv" key val ];
   mountTmpfs = path: [ "--tmpfs" path ];
-  
+
   bindPaths = map bind config.bubblewrap.bind.rw;
   bindRoPaths = map bindRo config.bubblewrap.bind.ro;
   bindDevPaths = map bindDev config.bubblewrap.bind.dev;
+  bindHardPaths = map bindHard config.bubblewrap.bind.rwHard;
+  bindRoHardPaths = map bindRoHard config.bubblewrap.bind.roHard;
   envVars = mapAttrsToList setEnv config.bubblewrap.env;
   tmpfs = map mountTmpfs config.bubblewrap.tmpfs;
 
@@ -63,6 +67,8 @@ let
 
     bindPaths
     bindRoPaths
+    bindHardPaths
+    bindRoHardPaths
     (optionals (config.bubblewrap.clearEnv) "--clearenv")
     envVars
     tmpfs

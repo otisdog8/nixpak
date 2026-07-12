@@ -41,6 +41,23 @@ in {
       default = [];
     };
 
+    bind.rwHard = mkOption {
+      description = ''
+        Read-write paths bound with a hard `--bind` (NOT `--bind-try`): if the
+        source is missing the sandbox fails to start instead of silently skipping
+        the mount. Use for paths a caller guarantees exist and whose absence must
+        be a loud error rather than silent data loss.
+      '';
+      type = bindType;
+      default = [];
+    };
+
+    bind.roHard = mkOption {
+      description = "Read-only paths bound with a hard `--ro-bind` (see bind.rwHard).";
+      type = bindType;
+      default = [];
+    };
+
     bind.firstArg = mkMountToggle "the first argument passed to the application" // { default = false; };
     bind.lastArg = mkMountToggle "the last argument passed to the application" // { default = false; };
 
